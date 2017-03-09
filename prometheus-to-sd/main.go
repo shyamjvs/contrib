@@ -36,6 +36,7 @@ var (
 	resolution  = flag.Duration("metrics-resolution", 60*time.Second, "The time, to poll the target.")
 	prefix      = flag.String("stackdriver-prefix", "container.googleapis.com/master", "Prefix needs to be added to every metric.")
 	whitelisted = flag.String("whitelisted-metrics", "", "Comma-separated list of whitelisted metrics. If empty all metrics will be exported.")
+	apioverride = flag.String("api-override", "", "The stackdriver API endpoint to override the default one used.")
 )
 
 func main() {
@@ -53,6 +54,9 @@ func main() {
 
 	client := oauth2.NewClient(oauth2.NoContext, google.ComputeTokenSource(""))
 	stackdriverService, err := v3.New(client)
+	if *apioverride != "" {
+		stackdriverService.BasePath = *apioverride
+	}
 	if err != nil {
 		glog.Fatalf("Failed to create Stackdriver client: %v", err)
 	}
